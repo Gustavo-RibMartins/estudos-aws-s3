@@ -31,7 +31,7 @@ No bucket `s3://gus-bucket-pessoal/estudos/Graduacao-UFABC/UFABC-EngenhariaEcono
 
 Código CLI
 ```BASH
-aws s3 cp s3://gus-bucket-pessoal/estudos/Graduacao-UFABC/UFABC-EngenhariaEconomica/ C:\USers\gusta\Downloads\s3\ --recursive
+aws s3 cp s3://gus-bucket-pessoal/estudos/Graduacao-UFABC/UFABC-EngenhariaEconomica/ C:\Users\gusta\Downloads\s3\ --recursive
 ```
 ![Download dos Objetos do S3](imagens/S3-downloads.png "Download dos Objetos do S3")
 
@@ -94,3 +94,14 @@ Aguarde até que a cópia finalize.
 
 ![S3 Cross Acount Copy Objects](imagens/S3-cross-account-copy.png "S3 Cross Acount Copy Objects")
 
+---
+
+#### 1.3) Deleção de pasta no Bucket
+
+Para deletar diversos objetos em uma pasta no bucket simultaneamente, execute o comando:
+
+```BASH
+aws s3 rm s3://<nome_do_objeto>/ --recursive
+```
+
+---
