@@ -10,6 +10,12 @@ Operações realizadas no S3 utilizando o Command Line Interface:
 1. Ter instalado o [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html);
 2. Ter configurado o arquivo `c:/Users/<seu usuário>/.aws/credentials` com a Access e Secret Key de um usuário do IAM com acesso programático e permissões de leitura e escreita no S3.
 
+- [1.1. Download de múltiplos objetos](#11-download-de-multiplos-objetos)
+- [1.2. Cópa de objetos entre buckets de contas diferentes](#12-cópia-de-objetos-entre-buckets-de-contas-diferentes)
+- [1.3. Deleção de pasta no bucket](#13-deleção-de-pasta-no-bucket)
+
+---
+
 ### 1.1) Download de multiplos objetos
 
 > Via console, só é possível realizar operações individuais sobre os objetos do Bucket, um a um, o que pode ser um problema quando se quer operar sobre vários objetos de uma vez.
