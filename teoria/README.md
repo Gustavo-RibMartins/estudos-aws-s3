@@ -9,7 +9,16 @@
     - [3.1. Política de Ciclo de Vida](#31-política-de-ciclo-de-vida)
     - [3.2. Bloqueio de Objetos](#32-bloqueio-de-objetos)
     - [3.3. Cross-Replication](#33-replicação)
-    - [3.4. S3 Batch Operations](#34-s3-batch-operations)
+    - [3.4. S3 Batch Operations](#34-s3-batch-operations) <<<<< doing
+    - [3.5. Versionamento](#35-versionamento)
+- [4. Gerenciamento de acesso e segurança](#4-gerenciamento-de-acesso-e-segurança)
+    - [4.1. Bloqueio de acesso público](#41-bloqueio-de-acesso-público)
+    - [4.2. IAM](#42-iam)
+    - [4.3. Bucket Policy](#43-bucket-policy) <<< doing
+    - [4.4. Endpoints](#44-endpoints)
+    - [4.5. ACLs](#45-acls)
+    - [4.6. Propriedade de objeto do S3](#46-propriedade-de-objeto-do-s3)
+    - [4.7. IAM access analyzer para S3](#47-iam-access-analyzer-para-s3)
 
 ---
 
@@ -108,7 +117,133 @@ Recurso que permite realizar diversas operações em larga escala nos objetos do
 - **Operation**: é o tipo de API action que você quer executar na operação batch. Cada job opera um único tipo de operação através dos objetos especificados no manifesto (GET, COPY);
 - **Task**: unidade de execução de um job. Representa uma única chamada de uma operation em um objeto. O S3 Batch Operations cria uma task para cada objeto especificado no manifesto.
 
+**Exemplo 1**: Usar o S3 Batch Operations para restaurar diversos objetos do Glacier Deep Archive.
+
+> **Cenário**: possuo um bucket chamado `gus-bucket-pessoal` na região `us-east-2` que possui uma pasta chamada `livros`. Essa pasta possui subpastas de categorias de livros como `computação`, `matematica` e `fisica` e dentro de cada uma delas há diversos PDFs armazenados no Glacier Deep Archive.
+
+![Batch Operantions](../imagens/s3-batch-ops.png "AWS S3 Batch Operations")
+
+Acessar o menu "Operações em lote" como destacado na imagem anterior. Alterar a região do job para a mesma região do bucket (no meu caso, us-east-2) e criar o job.
+
+![Batch Operantions](../imagens/s3-batch-create-job.png "AWS S3 Batch Operations")
+
+Para informar ao job quais objetos sofrerão a operação em lote, é preciso informar um arquivo de manifesto.
+
+![](../imagens/s3-batch-manifest.png "Batch Operations Manifest")
+
+O manifesto pode ser:
+
+- Um arquivo `manifest.json` gerado pelo [Relatório de Inventário do S3](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/storage-inventory.html?icmpid=docs_amazons3_console);
+
+- Pode ser um arquivo csv configurado por você, como no exemplo a seguir:
+
+Sem Version ID
+```json
+Examplebucket,objectkey1
+Examplebucket,objectkey2
+Examplebucket,objectkey3
+Examplebucket,photos/jpgs/objectkey4
+Examplebucket,photos/jpgs/newjersey/objectkey5
+Examplebucket,object%20key%20with%20spaces
+```
+
+Com Version ID (opcional)
+```json
+Examplebucket,objectkey1,PZ9ibn9D5lP6p298B7S9_ceqx1n5EJ0p
+Examplebucket,objectkey2,YY_ouuAJByNW1LRBfFMfxMge7XQWxMBF
+Examplebucket,objectkey3,jbo9_jhdPEyB4RrmOxWS0kU0EoNrU_oI
+Examplebucket,photos/jpgs/objectkey4,6EqlikJJxLTsHsnbZbSRffn24_eh5Ny4
+Examplebucket,photos/jpgs/newjersey/objectkey5,imHf3FAiRsvBW_EHB8GOu.NHunHO1gVs
+Examplebucket,object%20key%20with%20spaces,9HkPvDaZY5MVbMhn6TMn1YTb5ArQAo3w
+```
+
+Apenas o `Bucket` e o `Object ID` são obrigatórios.
+
+Como no meu caso tenho mais de 300 objetos no Glacier Deep Archive, vou usar o Relatório de Inventário do S3 para gerar um csv com todos esses objetos pra mim.
+
+O Amazon S3 Inventory fornece arquivos de saída nos formatos CSV (valores separados por vírgulas), ORC (colunar de linhas otimizado do Apache) ou Apache Parquet que listam seus objetos e os metadados correspondentes, diária ou semanalmente, para um bucket do S3 ou prefixo compartilhado (ou seja, objetos que tenham nomes que comecem com uma string comum).
+
+Acessar as configurações de gerenciamento do bucket.
+
+![](../imagens/s3-inventory-management.png)
+
+Criar uma configuração de inventário.
+
+![](../imagens/s3-inventory-create.png)
+
+Informe um nome e o prefixo do escopo do relatório de inventário, que serão os objetos que estarão listados no relatório. No meu caso, todos os objetos estão na pasta `livros`.
+
+![](../imagens/s3-inventory-name.png)
+
+Configure um bucket target onde o manifest.json será salvo. O bucket target precisa estar na mesma região do bucket origem.
+
+![](../imagens/s3-inventory-target.png)
+
+Escolha a frequência e formato do relatório.
+
+![](../imagens/s3-inventory-format.png)
+
+> **Note**
+> - O primeiro relatório só é gerado após 48h.
+
+Caso queira, você pode adicionar informações ao relatório.
+
+![](../imagens/s3-inventory-list.png)
+
+Aguardar cerca de 48h até que seu relatório de inventário esteja disponível no bucket de destino.
+
+![](../imagens/s3-inventory-ok.png)
+
 [![Home](https://img.shields.io/badge/voltar_ao_sumario-0A66C2?style=for-the-badge&logo=&logoColor=white)](#s3-estudos-de-aws-s3---teoria) [![Refs3](https://img.shields.io/badge/Referencia-batch_operations-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/batch-ops.html)
+
+### 3.5. Versionamento
+
+O versionamento te permite manter diversas variantes de um objeto no mesmo bucket. Você pode usá-la para se proteger contra operações não intencionais do usuário e de falhas da aplicação, inclusive contra deleção ou substituição não intencional.
+
+Ao excluir um objeto de um bucket com versionamento habilitado, o S3 irá inserir um **marcador de exclusão** em vez de remover o objeto permanentemente. O marcador de exclusão se torna a versão atual do objeto.
+
+> Depois que um bucket é habilitado para versionamento, ele nunca pode voltar a um estado sem versionamento novamente, mas você pode **suspender o versionamento** nesse bucket.
+
+O estado de versionamento se aplica a TODOS os objetos do bucket e não somente a alguns.
+
+Se você já tiver objetos no bucket quando o versionamento for habilitado, os objetos existentes permanecerão com `OBJECT_ID` nulo, e só receberão um ID quando sofrerem alguma alteração.
+
+[![Home](https://img.shields.io/badge/voltar_ao_sumario-0A66C2?style=for-the-badge&logo=&logoColor=white)](#s3-estudos-de-aws-s3---teoria) [![Refs3](https://img.shields.io/badge/Referencia-Versionamento-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/Versioning.html)
 
 ---
 
+## 4. Gerenciamento de acesso e segurança
+
+### 4.1. Bloqueio de acesso público
+
+Por padrão, os buckets de S3 e seus objetos são privados. O bloqueio de acesso público do S3 fornece quatro configurações. É possível aplicar essas configurações em qualquer combinação a pontos de acesso individuais, buckets ou contas da AWS inteiras.
+
+- Se você aplicar uma configuração a uma conta, ela se aplica a todos os buckets e pontos de acesso de propriedade dessa conta;
+- Se você aplicar uma configuração a um bucket, ela se aplicará a todos os pontos de acesso associados a esse bucket.
+
+> **Warning**
+> - O Amazon S3 não oferece suporte a configurações de bloqueio de acesso público por objeto.
+
+[![Home](https://img.shields.io/badge/voltar_ao_sumario-0A66C2?style=for-the-badge&logo=&logoColor=white)](#s3-estudos-de-aws-s3---teoria) [![Refs3](https://img.shields.io/badge/Referencia-Block_Public_Access-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/access-control-block-public-access.html)
+
+### 4.2. IAM
+
+Com o IAM, é possível gerenciar, de maneira centralizada, permissões que controlam quais recursos da AWS os usuários poderão acessar.
+
+[![Home](https://img.shields.io/badge/voltar_ao_sumario-0A66C2?style=for-the-badge&logo=&logoColor=white)](#s3-estudos-de-aws-s3---teoria) [![Refs3](https://img.shields.io/badge/Referencia-IAM_for_S3-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/s3-access-control.html)
+
+### 4.3. Bucket Policy
+
+
+### 4.4. Endpoints
+
+
+### 4.5. ACLs
+
+
+### 4.6. Propriedade de objeto do S3
+
+
+### 4.7. IAM Access Analyzer para S3
+
+---
