@@ -15,10 +15,18 @@
     - [4.1. Bloqueio de acesso público](#41-bloqueio-de-acesso-público)
     - [4.2. IAM](#42-iam)
     - [4.3. Bucket Policy](#43-bucket-policy) <<< doing
-    - [4.4. Endpoints](#44-endpoints)
-    - [4.5. ACLs](#45-acls)
-    - [4.6. Propriedade de objeto do S3](#46-propriedade-de-objeto-do-s3)
-    - [4.7. IAM access analyzer para S3](#47-iam-access-analyzer-para-s3)
+    - [4.4. Endpoints](#44-endpoints) <<< to do
+    - [4.5. ACLs](#45-acls) <<< to do
+    - [4.6. Propriedade de objeto do S3](#46-propriedade-de-objeto-do-s3) <<< to do
+    - [4.7. IAM access analyzer para S3](#47-iam-access-analyzer-para-s3) <<< to do
+- [5. Outros recursos](#5-outros-recursos)
+    - [5.1. S3 Storage Lens](#51-s3-storage-lens) <<< to do
+    - [5.2. Análise de classes de armazenamento](#52-análise-de-classes-de-armazenamento) <<< to do
+    - [5.3. S3 Transfer Accelerator](#53-s3-transfer-accelerator) <<< to do
+    - [5.4. Logs de acesso](#54-logs-de-acesso) <<< to do
+    - [5.5. S3 Select](#55-s3-select) <<< to do
+    - [5.6. Hospedagem de sites estáticos](#56-hospedagem-de-sites-estáticos) <<< to do
+- [6. Modelo de consistência de dados](#6-modelo-de-consistência-de-dados) <<< to do
 
 ---
 
@@ -304,3 +312,21 @@ Com o IAM, é possível gerenciar, de maneira centralizada, permissões que cont
 ### 4.7. IAM Access Analyzer para S3
 
 ---
+
+## 5. Outros recursos
+
+### 5.1. S3 Storage Lens
+
+### 5.2. Análise de Classes de Armazenamento
+
+### 5.3. S3 Transfer Accelerator
+
+### 5.4. Logs de Acesso
+
+### 5.5. S3 Select
+
+### 5.6. Hospedagem de Sites Estáticos
+
+---
+
+## 6. Modelo de consistência de Dados
