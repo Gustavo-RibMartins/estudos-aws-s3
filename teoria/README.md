@@ -9,7 +9,7 @@
     - [3.1. Política de Ciclo de Vida](#31-política-de-ciclo-de-vida)
     - [3.2. Bloqueio de Objetos](#32-bloqueio-de-objetos)
     - [3.3. Cross-Replication](#33-replicação)
-    - [3.4. S3 Batch Operations](#34-s3-batch-operations) <<<<< doing
+    - [3.4. S3 Batch Operations](#34-s3-batch-operations)
     - [3.5. Versionamento](#35-versionamento)
 - [4. Gerenciamento de acesso e segurança](#4-gerenciamento-de-acesso-e-segurança)
     - [4.1. Bloqueio de acesso público](#41-bloqueio-de-acesso-público)
@@ -193,6 +193,63 @@ Caso queira, você pode adicionar informações ao relatório.
 Aguardar cerca de 48h até que seu relatório de inventário esteja disponível no bucket de destino.
 
 ![](../imagens/s3-inventory-ok.png)
+
+Assim que o relatório estiver disponível, selecioner o relatório e clicar em `Criar trabalho a partir do manifesto`
+
+![](../imagens/s3-inventory-criar-trabalho.png)
+
+As informações do job batch serão preenchidas automaticamente com base no manifesto do relatório.
+
+Selecionar a opração em lote que deseja realizar, no meu caso, será restauração de objetos do Glacier Deep Archive.
+
+![](../imagens/s3-batch-restore.png)
+
+Escolher as configurações específicas da operação que vai realizar e clicar em `Próximo`.
+
+![](../imagens/s3-batch-restore2.png)
+
+Fazer as configurações adicionais do job escolhendo `prioridade de execução`, `Bucket de destino do relatório de execução do job` e `IAM Role` a ser usada no processamento.
+
+Nessa etapa, é precisa criar uma IAM Role que permita a execução do S3 Batch Operations. Fiz a criação da seguinte role adicionando a policy de `S3FullAccess`.
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "batchoperations.s3.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}
+```
+
+Assim que o job estiver pronto, fazer a execução.
+
+![](../imagens/s3-batch-execute.png)
+
+Aguardar a execução do job e checar se a operação teve sucesso. No meu caso, houve falha em 9% dos objetos.
+
+![](../imagens/s3-batch-results.png)
+
+Para checar o que ocorreu, acessar o bucket de destino do report de execução.
+
+![](../imagens/s3-batch-results2.png)
+
+Dentro da pasta `/results`, vai existir um arquivo csv com os objetos cuja operação em lote teve sucesso e outro com os objetos que a operação falhou.
+
+![](../imagens/s3-batch-results3.png)
+
+Lista dos 17 objetos em que houve falha no job do S3 Batch Operations.
+
+![](../imagens/s3-batch-errors.png)
+
+O motivo do erro, é que os 17 objetos não estavam armazenados no Glacier Deep Archive, sendo impossível de fazer o restor, como no caso do objeto `livros/eletrica/CircFoto-sistemas-opticos.pdf` que estava armazenado no Intelligent-Tiering.
+
+![](../imagens/s3-batch-errors2.png)
 
 [![Home](https://img.shields.io/badge/voltar_ao_sumario-0A66C2?style=for-the-badge&logo=&logoColor=white)](#s3-estudos-de-aws-s3---teoria) [![Refs3](https://img.shields.io/badge/Referencia-batch_operations-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/batch-ops.html)
 
