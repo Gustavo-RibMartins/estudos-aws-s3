@@ -13,6 +13,7 @@ Operações realizadas no S3 utilizando o Command Line Interface:
 - [1.1. Download de múltiplos objetos](#11-download-de-multiplos-objetos)
 - [1.2. Cópa de objetos entre buckets de contas diferentes](#12-cópia-de-objetos-entre-buckets-de-contas-diferentes)
 - [1.3. Deleção de pasta no bucket](#13-deleção-de-pasta-no-bucket)
+- [1.4. Cópia de objetos do Glacier](#14-cópia-de-objetos-do-glacier)
 
 ---
 
@@ -112,5 +113,20 @@ Para deletar diversos objetos em uma pasta no bucket simultaneamente, execute o 
 ```BASH
 aws s3 rm s3://<nome_do_objeto>/ --recursive
 ```
+
+---
+
+### 1.4) Cópia de objetos do Glacier
+
+Para operar sobre objetos do Glacier, é preciso primeiro restaurá-los, mas caso queira forçar a operação, basta usar o parâmetro `--force-glacier-transfer`.
+
+```bash
+aws s3 cp s3://<bucket_origem>/ s3://<bucket_destino> --force-glacier-transfer
+```
+
+> **Obs.**: como não estou passando o parâmetro `--storage-class`, a classe de armazenamento dos objetos no bucket de destino será `STANDARD`.
+
+> **Warning**
+> - Não esqueça que o usuário programático da conta de origem precisa ter permissão de `GET_OBJECT` na bucket policy do bucket de destino.
 
 ---
