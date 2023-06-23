@@ -21,8 +21,8 @@
     - [4.7. IAM access analyzer para S3](#47-iam-access-analyzer-para-s3) <<< to do
 - [5. Outros recursos](#5-outros-recursos)
     - [5.1. S3 Storage Lens](#51-s3-storage-lens)
-    - [5.2. Análise de classes de armazenamento](#52-análise-de-classes-de-armazenamento) <<< to do
-    - [5.3. S3 Transfer Accelerator](#53-s3-transfer-accelerator) <<< to do
+    - [5.2. Análise de classes de armazenamento](#52-análise-de-classes-de-armazenamento) <<< doing
+    - [5.3. S3 Transfer Acceleration](#53-s3-transfer-acceleration)
     - [5.4. Logs de acesso](#54-logs-de-acesso) <<< to do
     - [5.5. S3 Select](#55-s3-select) <<< to do
     - [5.6. Hospedagem de sites estáticos](#56-hospedagem-de-sites-estáticos) <<< to do
@@ -339,13 +339,46 @@ Ele oferece métricas gratuitas, bem como métricas e recomendações avançadas
 
 Também é possível exportar as métricas do Storage Lens em arquivos CSV ou Parquet em um bucket de destino para análise futura e analytics.
 
- [![Refs3](https://img.shields.io/badge/Referencia-Storage_Lens-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/storage_lens.html)
+[![Refs3](https://img.shields.io/badge/Referencia-Storage_Lens-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/storage_lens.html)
 
 ### 5.2. Análise de Classes de Armazenamento
 
 Usando a análise de classe de armazenamento do Amazon S3, você pode analisar padrões de acesso de armazenamento para ajudar a decidir quando fazer a transição dos dados certos para a classe de armazenamento certa.
 
-### 5.3. S3 Transfer Accelerator
+> **Warning**
+> - A análise de classe de armazenamento fornece apenas recomendações para as classes IA Standart e Standart.
+
+A Análise de Classe de Armazenamento é feita através da guia de Métricas do Bucket.
+
+![](../imagens/s3-analise-classe.png)
+![](../imagens/s3-analise-classe-create.png)
+
+Você consegue definir o escopo da análise aplicando a todos os objetos do bucket ou filtrando por um prefixo (como o nome de uma pasta) ou por tags de objeto.
+
+![](../imagens/s3-analise-classe-escopo.png)
+
+Você também pode escolher se quer exportar os resultados da análise para um CSV.
+
+> **Note**
+> - O relatório pode levar até 24h para você poder visualizar os dados.
+
+[![Refs3](https://img.shields.io/badge/Referencia-Storage_Class_Analyse-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/analytics-storage-class.html)
+
+### 5.3. S3 Transfer Acceleration
+
+Endpoint que acelera o ulpoad de dados para o S3, pois faz uso de um Edge Location. Você pode acessar o [SpeedTestTool](https://s3-accelerate-speedtest.s3-accelerate.amazonaws.com/en/accelerate-speed-comparsion.html) e verificar o desempenho de usar ou não o Transfer Acceleration.
+
+![](../imagens/s3-transfer-acc.png)
+
+Você é cobrado por GB de dados movidos, mas se for identificado que o uso do Transfer Acceleration irá gerar um desempenho igual ou pior que um upload comum, esse recurso não é cobrado.
+
+Por exemplo, se fizessemos upload para a região `sa-east-1`, o Transfer Acceleration não seria cobrado por apresentar uma performance pior que a de um upload comum.
+
+![](../imagens/s3-transfer-acc-example.png)
+
+Para acessar o bucket que está habilitado para o Transfer Acceleration, você deve usar o endpoint `bucketName.s3-accelerate.amazonaws.com`
+
+[![Refs3](https://img.shields.io/badge/Referencia-Transfer_Acceleration-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/transfer-acceleration.html)
 
 ### 5.4. Logs de Acesso
 
@@ -354,6 +387,8 @@ Usando a análise de classe de armazenamento do Amazon S3, você pode analisar p
 ### 5.6. Hospedagem de Sites Estáticos
 
 ### 5.7. Multpart Upload
+
+### 5.8. Cross Resource Sharing
 
 ---
 
