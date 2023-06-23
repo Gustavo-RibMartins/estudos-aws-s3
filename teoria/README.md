@@ -23,7 +23,7 @@
     - [5.1. S3 Storage Lens](#51-s3-storage-lens)
     - [5.2. Análise de classes de armazenamento](#52-análise-de-classes-de-armazenamento) <<< doing
     - [5.3. S3 Transfer Acceleration](#53-s3-transfer-acceleration)
-    - [5.4. Logs de acesso](#54-logs-de-acesso) <<< to do
+    - [5.4. Logs de acesso](#54-logs-de-acesso) <<< doing
     - [5.5. S3 Select](#55-s3-select) <<< to do
     - [5.6. Hospedagem de sites estáticos](#56-hospedagem-de-sites-estáticos) <<< to do
     - [5.7. Multpart Upload](#57-multpart-upload) <<< to do
@@ -382,7 +382,22 @@ Para acessar o bucket que está habilitado para o Transfer Acceleration, você d
 
 ### 5.4. Logs de Acesso
 
+Fornece detalhes sobre as solicitações que são feitas a um bucket. Você pode usar logs de acesso ao servidor para muitos casos de uso, como conduzir auditorias de segurança e acesso, saber mais sobre sua base de clientes e entender sua fatura do Amazon S3.
+
+Você habilita os logs de acesso no menu de `Propriedades` do bucket. É preciso informar um bucket de destino para armazenar os logs e é recomendado que você **não use o mesmo bucket que monitorará os acessos como bucket de destino dos logs**.
+
+![](../imagens/s3-logs.png)
+
+[![Refs3](https://img.shields.io/badge/Referencia-Logs_Acesso-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/ServerLogs.html)
+
 ### 5.5. S3 Select
+
+Linguagem de consulta estruturada (SQL) para filtrar o conteúdo de um objeto no S3 e recuperar somente o subconjunto de dados necessários. Funciona em objetos armazenados em formato CSV, JSON ou Apache Parquet. Também funciona com objetos compactados com GZIP ou BZIP2 (somente para CSV ou JSON) e objetos criptografados no lado do servidor.
+
+O console limita a quantidade de dados retornados em 40 MB. Para recuperar mais dados use CLI ou API.
+
+Não é possível rodar a query em objetos do Glacier e o formato de saída é CSV ou JSON.
+
 
 ### 5.6. Hospedagem de Sites Estáticos
 
