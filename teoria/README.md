@@ -13,19 +13,20 @@
     - [3.5. Versionamento](#35-versionamento)
 - [4. Gerenciamento de acesso e segurança](#4-gerenciamento-de-acesso-e-segurança)
     - [4.1. Bloqueio de acesso público](#41-bloqueio-de-acesso-público)
-    - [4.2. IAM](#42-iam)
+    - [4.2. IAM](#42-iam) <<< doing
     - [4.3. Bucket Policy](#43-bucket-policy) <<< doing
     - [4.4. Endpoints](#44-endpoints) <<< to do
     - [4.5. ACLs](#45-acls) <<< to do
     - [4.6. Propriedade de objeto do S3](#46-propriedade-de-objeto-do-s3) <<< to do
     - [4.7. IAM access analyzer para S3](#47-iam-access-analyzer-para-s3) <<< to do
 - [5. Outros recursos](#5-outros-recursos)
-    - [5.1. S3 Storage Lens](#51-s3-storage-lens) <<< to do
+    - [5.1. S3 Storage Lens](#51-s3-storage-lens)
     - [5.2. Análise de classes de armazenamento](#52-análise-de-classes-de-armazenamento) <<< to do
     - [5.3. S3 Transfer Accelerator](#53-s3-transfer-accelerator) <<< to do
     - [5.4. Logs de acesso](#54-logs-de-acesso) <<< to do
     - [5.5. S3 Select](#55-s3-select) <<< to do
     - [5.6. Hospedagem de sites estáticos](#56-hospedagem-de-sites-estáticos) <<< to do
+    - [5.7. Multpart Upload](#57-multpart-upload) <<< to do
 - [6. Modelo de consistência de dados](#6-modelo-de-consistência-de-dados) <<< to do
 
 ---
@@ -44,7 +45,7 @@ O S3 pode ser usado para armazenar qualquer volume de dados estruturados, semi-e
     - Pode ter um **version ID** que representa a versão do objeto no bucket. A junção da Key com o Version ID identificam cada objeto no bucket como único;
     - **Value**, que é o conteúdo do objeto. Cada objeto individualmente pode ter até 5 TB.
 
-[![Home](https://img.shields.io/badge/voltar_ao_sumario-0A66C2?style=for-the-badge&logo=&logoColor=white)](#s3-estudos-de-aws-s3---teoria) [![Refs3](https://img.shields.io/badge/Referencia-s3-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingObjects.html)
+[![Refs3](https://img.shields.io/badge/Referencia-s3-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingObjects.html)
 
 ---
 
@@ -65,7 +66,7 @@ Se o tamanho de um objeto for menor que 128 KB, ele não será monitorado nem qu
 
 **S3 Glacier Deep Archive**: Classe mais barata, para dados raramente acessados. Os dados têm um período mínimo de duração de armazenamento de 180 dias e um tempo de recuperação padrão de 12 horas.
 
-[![Home](https://img.shields.io/badge/voltar_ao_sumario-0A66C2?style=for-the-badge&logo=&logoColor=white)](#s3-estudos-de-aws-s3---teoria) [![Refs3](https://img.shields.io/badge/Referencia-storage_class-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html)
+[![Refs3](https://img.shields.io/badge/Referencia-storage_class-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html)
 
 ---
 
@@ -84,7 +85,7 @@ Se o tamanho de um objeto for menor que 128 KB, ele não será monitorado nem qu
 **Exemplo de uma lifecyle policy**
 ![lifecycle](../imagens/s3-lifecycle.png "Exemplo de um S3 Lifecycle rule")
 
-[![Home](https://img.shields.io/badge/voltar_ao_sumario-0A66C2?style=for-the-badge&logo=&logoColor=white)](#s3-estudos-de-aws-s3---teoria) [![Refs3](https://img.shields.io/badge/Referencia-lifecycle-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html)
+[![Refs3](https://img.shields.io/badge/Referencia-lifecycle-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html)
 
 ### 3.2. Bloqueio de objetos
 
@@ -98,7 +99,7 @@ Você pode habilitar esse recurso ao criar um bucket para prevenir deleções ac
 
 Você também pode exigir uma confirmação com MFA para executar a deleção ou atualização de um objeto protegido.
 
-[![Home](https://img.shields.io/badge/voltar_ao_sumario-0A66C2?style=for-the-badge&logo=&logoColor=white)](#s3-estudos-de-aws-s3---teoria) [![Refs3](https://img.shields.io/badge/Referencia-object_lock-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html)
+[![Refs3](https://img.shields.io/badge/Referencia-object_lock-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock.html)
 
 ### 3.3. Replicação
 
@@ -110,7 +111,7 @@ Você também pode exigir uma confirmação com MFA para executar a deleção ou
 > **Warning**
 > - Você consegue habilitar a replicação em um bucket existente, porém, os dados inseridos antes da habilitação da replicação não são copiados para o bucket replicado.
 
-[![Home](https://img.shields.io/badge/voltar_ao_sumario-0A66C2?style=for-the-badge&logo=&logoColor=white)](#s3-estudos-de-aws-s3---teoria) [![Refs3](https://img.shields.io/badge/Referencia-replication-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html)
+[![Refs3](https://img.shields.io/badge/Referencia-replication-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html)
 
 ### 3.4. S3 Batch Operations
 
@@ -259,7 +260,7 @@ O motivo do erro, é que os 17 objetos não estavam armazenados no Glacier Deep 
 
 ![](../imagens/s3-batch-errors2.png)
 
-[![Home](https://img.shields.io/badge/voltar_ao_sumario-0A66C2?style=for-the-badge&logo=&logoColor=white)](#s3-estudos-de-aws-s3---teoria) [![Refs3](https://img.shields.io/badge/Referencia-batch_operations-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/batch-ops.html)
+[![Refs3](https://img.shields.io/badge/Referencia-batch_operations-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/batch-ops.html)
 
 ### 3.5. Versionamento
 
@@ -273,7 +274,7 @@ O estado de versionamento se aplica a TODOS os objetos do bucket e não somente 
 
 Se você já tiver objetos no bucket quando o versionamento for habilitado, os objetos existentes permanecerão com `OBJECT_ID` nulo, e só receberão um ID quando sofrerem alguma alteração.
 
-[![Home](https://img.shields.io/badge/voltar_ao_sumario-0A66C2?style=for-the-badge&logo=&logoColor=white)](#s3-estudos-de-aws-s3---teoria) [![Refs3](https://img.shields.io/badge/Referencia-Versionamento-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/Versioning.html)
+[![Refs3](https://img.shields.io/badge/Referencia-Versionamento-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/Versioning.html)
 
 ---
 
@@ -289,13 +290,13 @@ Por padrão, os buckets de S3 e seus objetos são privados. O bloqueio de acesso
 > **Warning**
 > - O Amazon S3 não oferece suporte a configurações de bloqueio de acesso público por objeto.
 
-[![Home](https://img.shields.io/badge/voltar_ao_sumario-0A66C2?style=for-the-badge&logo=&logoColor=white)](#s3-estudos-de-aws-s3---teoria) [![Refs3](https://img.shields.io/badge/Referencia-Block_Public_Access-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/access-control-block-public-access.html)
+[![Refs3](https://img.shields.io/badge/Referencia-Block_Public_Access-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/access-control-block-public-access.html)
 
 ### 4.2. IAM
 
 Com o IAM, é possível gerenciar, de maneira centralizada, permissões que controlam quais recursos da AWS os usuários poderão acessar.
 
-[![Home](https://img.shields.io/badge/voltar_ao_sumario-0A66C2?style=for-the-badge&logo=&logoColor=white)](#s3-estudos-de-aws-s3---teoria) [![Refs3](https://img.shields.io/badge/Referencia-IAM_for_S3-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/s3-access-control.html)
+[![Refs3](https://img.shields.io/badge/Referencia-IAM_for_S3-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/s3-access-control.html)
 
 ### 4.3. Bucket Policy
 
@@ -317,7 +318,32 @@ Com o IAM, é possível gerenciar, de maneira centralizada, permissões que cont
 
 ### 5.1. S3 Storage Lens
 
+Recurso de análise de armazenamento em nuvem para monitorar o uso e atividade do armazenamento de objetos no S3. Também fornece recomendações contextuais que você pode usar para otimizar custos de armazenamento e práticas recomendadas de proteção de dados.
+
+O S3 Storage Lens fornece um painel padrão que é atualizado diariamente.
+
+![](../imagens/s3-storage-lens-intro.png)
+
+Ele oferece métricas gratuitas, bem como métricas e recomendações avançadas por custo adicional.
+
+**Dash default**
+
+![](../imagens/s3-storage-lens-dash.png)
+![](../imagens/s3-storage-lens-dash2.png)
+![](../imagens/s3-storage-lens-dash3.png)
+![](../imagens/s3-storage-lens-dash4.png)
+
+É possível criar painéis no nível organizacional habilitando o Storage Leans no AWS Organizations, para monitorar buckets de várias contas de forma centralizada.
+
+> **Obs.**: ao criar um painel, os dados são exibidos no dash após 48h.
+
+Também é possível exportar as métricas do Storage Lens em arquivos CSV ou Parquet em um bucket de destino para análise futura e analytics.
+
+ [![Refs3](https://img.shields.io/badge/Referencia-Storage_Lens-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/storage_lens.html)
+
 ### 5.2. Análise de Classes de Armazenamento
+
+Usando a análise de classe de armazenamento do Amazon S3, você pode analisar padrões de acesso de armazenamento para ajudar a decidir quando fazer a transição dos dados certos para a classe de armazenamento certa.
 
 ### 5.3. S3 Transfer Accelerator
 
@@ -326,6 +352,8 @@ Com o IAM, é possível gerenciar, de maneira centralizada, permissões que cont
 ### 5.5. S3 Select
 
 ### 5.6. Hospedagem de Sites Estáticos
+
+### 5.7. Multpart Upload
 
 ---
 
