@@ -27,8 +27,8 @@
     - [5.5. S3 Select](#55-s3-select)
     - [5.6. Hospedagem de sites estáticos](#56-hospedagem-de-sites-estáticos)
     - [5.7. Multpart Upload](#57-multpart-upload)
-    - [5.8. Cross Resource Sharing](#58-cross-resource-sharing) <<< to do
-- [6. Modelo de consistência de dados](#6-modelo-de-consistência-de-dados) <<< to do
+    - [5.8. Cross Resource Sharing](#58-cross-resource-sharing)
+- [6. Modelo de consistência de dados](#6-modelo-de-consistência-de-dados)
 
 ---
 
@@ -522,6 +522,74 @@ Benefícios do Multipart Upload:
 
 ### 5.8. Cross Resource Sharing
 
+Compartilhamento de recursos de origem cruzada (CORS) define uma maneira de aplicativos web client carregados em um domínio interagirem com recursos em outro domínio.
+
+#### Cenários de uso
+
+**Cenário 1:**
+
+Você hospeda um site estático no S3 chamado `website` que é acessível através do endpoint `http://website.s3-website.us-east-1.amazonaws.com`.
+
+Agora, você quer fazer uso de JavaScript nas páginas desse bucket para fazer solicitações GET e PUT autenticadas no mesmo bucket usando o endpoint da API do S3 para o bucket: `website.s3.us-east-1.amazonaws.com`.
+
+Um navegador normalmente impediria que o JavaScript fizesses essas solicitações, mas com CORs, é possível configurar o bucket para permitir explicitamente solicitações de origem cruzada de `website.s3-website.us-east-1.amazonaws.com.`.
+
+**Cenário 2:**
+
+Você possui um website estático no S3 e precisa acessar dados de outro domínio, como outro site em um outro bucket S3.
+
+[![Refs3](https://img.shields.io/badge/Referencia-CORS-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/cors.html)
+
 ---
 
 ## 6. Modelo de consistência de Dados
+
+O S3 oferece uma forte consistÊncia de leitura após gravação para solicitações de PUT e DELETE de objetos no bucket em todas as regiões da AWS. Isso se aplica as gravações em novos objetos, solicitações de PUT que sobrescrevem objetos existentes e solicitações de DELETE.
+
+As atualizações em um único key são atômicas. Por exemplo, se você executar um PUT em um objcet-key e um GET no mesmo object-key simultaneamente, você obterá os dados antigos ou novos, mas nunca dados parciais ou corrompidos.
+
+O Amazon S3 atinge alta disponibilidade replicando dados entre vários servidores nos datacenters da AWS. Se uma solicitação PUT for bem-sucedida, os dados serão armazenados com segurança. Qualquer leitura (solicitação de GET ou LIST) iniciada após o recebimento de uma resposta PUT bem-sucedida retornará os dados escritos pelo PUT.
+
+> **Note**
+>
+> - O Amazon S3 não oferece suporte ao bloqueio de objetos para escrita simultânea. Se duas solicitações PUT forem realizadas simultaneamenta na mesma chave, a solicitação com timestamp mais recente será a escolhida. Se isso for um problema, você precisará criar um mecanismo de bloqueio de objetos em sua aplicação.
+>
+> - As atualizações são baseadas em chave, não é possível realizar atualizações atômicas entre chaves. Por exemplo, você não pode tornar a atualização de uma chave dependente da atualização de outra chave, a menos que vocÊ desenvolva essa funcionalidade na aplicação.
+
+As configurações de bucket têm um modelo de consistência eventual, dessa forma:
+
+- Se você excluir um bucket e listar imediatamente todos os buckets, o bucket excluído ainda poderá ser exibido na lista;
+- Se você ativar o versionamento em um bucket pela primeira vez, pode levar um curto período de tempo para que a alteração seja totalmente propagada. A recomendação da AWS é aguardar 15 minutos após ativar o vesionamento antes de realizar gravações (PUT ou DELETE).
+
+#### Exemplos de aplicações simultâneas e comportamento esperado
+
+Exemplos de comportamento esperado do S3 em casos de operações feitas no mesmo objeto.
+
+**i) Escritas sequenciais**
+
+O cliente 1 finaliza o PUT do objeto em T1 e o cliente 2 inicia o PUT do objeto em T2, após a primeira escrita ter finalizado, e finaliza em T3.
+
+Nesse caso, qualquer GET feito após T3 retornará o objeto escrito pelo cliente 2.
+
+![](../imagens/s3-model-1.png)
+
+**ii) Leitura e escrita simultânea**
+
+Nesse caso, ocorre o seguinte:
+
+- O cliente C2 inicia uma escrita W2 em T2 que termina em T4;
+- Porém, em T3 o cliente C1 inicia uma leitura R1, antes da escrita W2 finalizar.
+
+![](../imagens/s3-model-2.png)
+
+Nesse caso, como o S3 ainda não recebeu a confirmação da escrita W2, a leitura R1 pode retornar a versão antiga ou nova do objeto sobrescrito por W2.
+
+**iii) Escritas simultâneas**
+
+Aqui, o cliente C1 realiza uma escrita W1 que inicia em T0 e termina em T2, porém antes de finalizar, o cliente C2 inicia uma escrita W2 em T1.
+
+![](../imagens/s3-model-3.png)
+
+Nesse caso, o S3 usará a regra do **último escritor** para determinar qual gravação tem precedência. No entanto, a ordem em que o Amazon S3 recebe as solicitações e a ordem em que as aplicações recebem confirmações não podem ser previstas devido a fatores como a latência de rede. Por exemplo, o W2 pode ser iniciado por uma instância do Amazon EC2 na mesma região, enquanto o W1 pode ser iniciado por um host que está mais longe. A melhor maneira de determinar o valor final é realizar uma leitura após ambas as gravações terem sido confirmadas.
+
+[![Refs3](https://img.shields.io/badge/Referencia-S3_Consistence_Model-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/Welcome.html)
