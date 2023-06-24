@@ -130,3 +130,8 @@ aws s3 cp s3://<bucket_origem>/ s3://<bucket_destino> --force-glacier-transfer
 > - Não esqueça que o usuário programático da conta de origem precisa ter permissão de `GET_OBJECT` na bucket policy do bucket de destino.
 
 ---
+
+### 1.5) Multipart Upload
+
+Comandos `aws s3`, como o `aws S3 cp`, aplicam multipart upload automaticamente tantao para upload quanto download de arquivos grandes. O caso a seguir, seria específico para o caso em que os comandos `aws s3` não suportem um upload específico. Para esses casos, precisamos usar `aws s3api`, como `aws s3api create-multipart-upload`.
+

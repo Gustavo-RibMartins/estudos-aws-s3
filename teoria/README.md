@@ -518,6 +518,8 @@ Benefícios do Multipart Upload:
 
 4. **Começar um carregamento antes de saber o tamanho final do objeto**: carregar o objeto a medida que ele é criado.
 
+[![Refs3](https://img.shields.io/badge/Referencia-Multipart_Upload-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/mpuoverview.html)
+
 ### 5.8. Cross Resource Sharing
 
 ---
