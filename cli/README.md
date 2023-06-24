@@ -14,6 +14,7 @@ Operações realizadas no S3 utilizando o Command Line Interface:
 - [1.2. Cópa de objetos entre buckets de contas diferentes](#12-cópia-de-objetos-entre-buckets-de-contas-diferentes)
 - [1.3. Deleção de pasta no bucket](#13-deleção-de-pasta-no-bucket)
 - [1.4. Cópia de objetos do Glacier](#14-cópia-de-objetos-do-glacier)
+- [1.5. Multipart Upload](#15-multipart-upload)
 
 ---
 
@@ -134,4 +135,3 @@ aws s3 cp s3://<bucket_origem>/ s3://<bucket_destino> --force-glacier-transfer
 ### 1.5) Multipart Upload
 
 Comandos `aws s3`, como o `aws S3 cp`, aplicam multipart upload automaticamente tantao para upload quanto download de arquivos grandes. O caso a seguir, seria específico para o caso em que os comandos `aws s3` não suportem um upload específico. Para esses casos, precisamos usar `aws s3api`, como `aws s3api create-multipart-upload`.
-
