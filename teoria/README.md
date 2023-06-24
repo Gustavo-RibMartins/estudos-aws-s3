@@ -21,12 +21,13 @@
     - [4.7. IAM access analyzer para S3](#47-iam-access-analyzer-para-s3) <<< to do
 - [5. Outros recursos](#5-outros-recursos)
     - [5.1. S3 Storage Lens](#51-s3-storage-lens)
-    - [5.2. Análise de classes de armazenamento](#52-análise-de-classes-de-armazenamento) <<< doing
+    - [5.2. Análise de classes de armazenamento](#52-análise-de-classes-de-armazenamento)
     - [5.3. S3 Transfer Acceleration](#53-s3-transfer-acceleration)
-    - [5.4. Logs de acesso](#54-logs-de-acesso) <<< doing
-    - [5.5. S3 Select](#55-s3-select) <<< to do
+    - [5.4. Logs de acesso](#54-logs-de-acesso)
+    - [5.5. S3 Select](#55-s3-select)
     - [5.6. Hospedagem de sites estáticos](#56-hospedagem-de-sites-estáticos) <<< to do
     - [5.7. Multpart Upload](#57-multpart-upload) <<< to do
+    - [5.8. Cross Resource Sharing](#58-cross-resource-sharing) <<< to do
 - [6. Modelo de consistência de dados](#6-modelo-de-consistência-de-dados) <<< to do
 
 ---
@@ -398,6 +399,23 @@ O console limita a quantidade de dados retornados em 40 MB. Para recuperar mais 
 
 Não é possível rodar a query em objetos do Glacier e o formato de saída é CSV ou JSON.
 
+Ao acessar um objeto, é possível consultá-lo acessando **Ações de objeto** e clicando em **Consulta com o S3 Select**.
+
+![](../imagens/s3-select.jpg)
+
+Informe as configurações do arquivo de entrada, que é o arquivo que será analisado.
+
+![](../imagens/s3-select-input.jpg)
+
+Configure a saída e a consulta SQL que deseja executar.
+
+![](../imagens/s3-select-output.jpg)
+
+Ao clicar em `Executar consulta SQL` os dados são exibidos.
+
+![](../imagens/s3-select-results.jpg)
+
+[![Refs3](https://img.shields.io/badge/Referencia-S3_Select-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/selecting-content-from-objects.html)
 
 ### 5.6. Hospedagem de Sites Estáticos
 
