@@ -25,8 +25,8 @@
     - [5.3. S3 Transfer Acceleration](#53-s3-transfer-acceleration)
     - [5.4. Logs de acesso](#54-logs-de-acesso)
     - [5.5. S3 Select](#55-s3-select)
-    - [5.6. Hospedagem de sites estáticos](#56-hospedagem-de-sites-estáticos) <<< to do
-    - [5.7. Multpart Upload](#57-multpart-upload) <<< to do
+    - [5.6. Hospedagem de sites estáticos](#56-hospedagem-de-sites-estáticos)
+    - [5.7. Multpart Upload](#57-multpart-upload)
     - [5.8. Cross Resource Sharing](#58-cross-resource-sharing) <<< to do
 - [6. Modelo de consistência de dados](#6-modelo-de-consistência-de-dados) <<< to do
 
@@ -419,7 +419,104 @@ Ao clicar em `Executar consulta SQL` os dados são exibidos.
 
 ### 5.6. Hospedagem de Sites Estáticos
 
+Você pode usar o Amazon S3 para hospedar um site estático. Em um site estático, as páginas da Web individuais incluem conteúdo estático. Elas também podem conter scripts do lado do cliente.
+
+Ao contrário, um site dinâmico depende do processamento no servidor, incluindo scripts executados no servidor, como PHP, JSP ou ASP.NET. O Amazon S3 não oferece suporte a scripts no lado do servidor, mas a AWS tem outros recursos para hospedar sites dinâmicos.
+
+Para habilitar hospedagem de site estático, é preciso editar as `Propriedades` do Bucket.
+
+![](../imagens/s3-website.png)
+
+Informar o nome do arquivo que fará papel de `index.html`, que será retornado quando o S3 receber solicitações para o domínio raiz ou alguma subpasta.
+
+Por exemplo, se um usuário insere `http://www.example.com` no navegador, ele não está solicitando nenhuma página específica. Nesse caso, o S3 exibe o index.html, que é a página padrão.
+
+Informar o nome do arquivo de erros personalizado para erros da classe 4XX. Se você não informar, ao ocorrer um erro, o S3 retornará um documento de erro HTML padrão.
+
+![](../imagens/s3-website-index.png)
+
+Opcionalmente, você pode configurar regras avançadas de redirecionamento, por exemplo, encaminhar condicionalmente de acordo com nomes de chave de objeto ou prefixos especificados na solicitação.
+
+Ao salvar, será criado um endpoint para o site estático no seguinte padrão:
+
+```
+http://<nome do bucket>.s3-website-<região>.amazonaws.com
+```
+
+![](../imagens/s3-website-endpoint.png)
+
+Para o website se tornar acessível, é preciso editar as configurações de **bloqueio de acesso público** e remover o bloqueio default.
+
+![](../imagens/s3-website-block.png)
+
+Depois de remover o bloqueio de acesso público, é preciso criar uma `Bucket Policy` para conceder acesso público de leitura.
+
+Exemplo de Policy:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PublicReadGetObject",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::Bucket-Name/*"
+            ]
+        }
+    ]
+}
+```
+
+Depois de configurar os acessos, você precisa fazer upload do arquivi `index.html` com o conteúdo da página (e do `error.html` caso não vá usar o default da AWS).
+
+Exemplo de `index.html`:
+
+```html
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>Bem-vindo!</title>
+</head>
+<body>
+  <h1>Bem-vindo ao site!</h1>
+  <p>Agora hospedado no Amazon S3!</p>
+  <img src=https://i1.wp.com/www.topito.com/wp-content/uploads/2013/01/code-35.gif>
+</body>
+</html>
+```
+
+O código acima gera a seguinte página:
+
+![](../imagens/s3-website-page.png)
+
+Faça o mesmo para o arquivo `error.html`, e em casos de erro a requisição será direcionada pra ele. Por exemplo, se eu passar a url `http://aprendizado-testes-website.s3-website-us-east-1.amazonaws.com/nao-existe` no navegar, para uma página que não existe no meu site, o arquivo `error.html` será retornado.
+
+![](../imagens/s3-website-error.png)
+
+> **Note**
+> - O S3 não oferece suporte para acesso HTTPS ao site, somente HTTP. Se quiser usar HTTPS, é preciso usar o Amazon CloudFront para servir um site estático hospedado no S3.
+
+[![Refs3](https://img.shields.io/badge/Referencia-s3_Site_Estatico-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/HostingWebsiteOnS3Setup.html)
+
 ### 5.7. Multpart Upload
+
+Permite que vocÊ faça upload de um único objeto como um conjunto de partes. Cada parte é uma parte contínua de dados do objeto e o upload dessas partes pode ser feito de forma independente e em qualquer ordem. Se a transmissão de umas das partes falhas, vocÊ pode retransmitir essa parte sem afetar as outras. Depois que todas as partes do objeto forem carregadas, o S3 montará essas partes e criará o objeto.
+
+Esse tipo de upload é recomendado quando você precisa fazer upload de objetos maiores que 100 MB.
+
+Benefícios do Multipart Upload:
+
+1. **Throughput aprimorado**: a carga das partes pode ser feita em paralelo;
+
+2. **Recuperação rápida de falhas de rede**: se houver falhas de rede, basta reiniciar o carregamento que falhou;
+
+3. **Pausar e retomar carregamentos**: você pode carregar as partes do objeto ao longo do tempo. Após ser iniciado um carregamento fracionado, ele não expira; você deve concluir ou interromper explicitamente o multipart upload;
+
+4. **Começar um carregamento antes de saber o tamanho final do objeto**: carregar o objeto a medida que ele é criado.
 
 ### 5.8. Cross Resource Sharing
 
