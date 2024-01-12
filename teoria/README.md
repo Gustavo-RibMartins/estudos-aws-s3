@@ -14,7 +14,7 @@
 - [4. Gerenciamento de acesso e segurança](#4-gerenciamento-de-acesso-e-segurança)
     - [4.1. Bloqueio de acesso público](#41-bloqueio-de-acesso-público)
     - [4.2. IAM](#42-iam) <<< doing
-    - [4.3. Bucket Policy](#43-bucket-policy) <<< doing
+    - [4.3. Bucket Policy](#43-bucket-policy)
     - [4.4. Endpoints](#44-endpoints) <<< to do
     - [4.5. ACLs](#45-acls) <<< to do
     - [4.6. Propriedade de objeto do S3](#46-propriedade-de-objeto-do-s3) <<< to do
@@ -28,6 +28,9 @@
     - [5.6. Hospedagem de sites estáticos](#56-hospedagem-de-sites-estáticos)
     - [5.7. Multpart Upload](#57-multpart-upload)
     - [5.8. Cross Resource Sharing](#58-cross-resource-sharing)
+    - [5.9. Amazon S3 Analytics](#59-amazon-s3-analytics)
+    - [5.10. Event Notification](#510-notificação-de-eventos)
+    - [5.11. S3 Byte-Range Fetches](#511-s3-byte-range-fetches)
 - [6. Modelo de consistência de dados](#6-modelo-de-consistência-de-dados)
 
 ---
@@ -36,6 +39,25 @@
 
 O S3 pode ser usado para armazenar qualquer volume de dados estruturados, semi-estruturados e não estruturados. O serviço garante alta durabilidade e disponibilidade dos objetos armazenados porque os dados são armazenados em pelo menos 3 zonas de disponibilidade de forma automática.
 
+**Durabilidade**:
+
+* Alta durabilidade de objetos entre multiplas AZs (99.999999999%, 11 9's). Se você armazenar 10.000.000 de objetos no S3, você em média ira perder um objeto a cada 10.000 anos;
+* A durabilidade é a mesma para todas as classes de armazenamento.
+
+**Disponibilidade**:
+
+* Mede o quão disponível para leitura o serviço é;
+* Depende da classe de armazenamento. Exemplo: S3 standart tem 99.99% de disponibilidade = não disponível em 53 minutos no ano.
+
+**Performance**:
+
+Amazon S3 escala automaticamente para ranges de alta requisição, com latência de 100-200 ms.
+
+Sua aplicação pode alcançar:
+
+* 3.500 requisições de put/copy/post/delete por segundo por prefixo em um bucket, ou;
+* 5.500 requisições de get/head por segundo por prefixo em um bucket.
+
 ![S3](../imagens/s3-intro.png "AWS S3")
 
 - **Buckets**: os dados são armazenados em Buckets que são estruturas com nome único em toda a internet (2 buckets não podem ter o mesmo nome em todo o planeta). Não há limites para a quantidade de dados que você pode armazenar no Bucket;
@@ -43,8 +65,32 @@ O S3 pode ser usado para armazenar qualquer volume de dados estruturados, semi-e
 - **Objetos**: são os arquivos, dados ou qualquer item a ser armazenado nos buckets. Cada objeto possui as seguintes caracterísitcas:
     
     - Possui um **Key** que é o nome do objeto dentro do bucket;
+    - No S3 não existe o conceito de pasta (embora os recursos de UI da plataforma emulem isso), nesses casos, a **key** do objeto é composta por um **prefixo**, que seriam os nomes dos diretórios + **object name**;
     - Pode ter um **version ID** que representa a versão do objeto no bucket. A junção da Key com o Version ID identificam cada objeto no bucket como único;
-    - **Value**, que é o conteúdo do objeto. Cada objeto individualmente pode ter até 5 TB.
+    - **Value**, que é o conteúdo do objeto. Cada objeto individualmente pode ter até 5 TB;
+    - **Metadata**, lista de `key/ value pairs` gerados por sistema ou usuário para inserir alguns metadados no objeto;
+    - **Prefixo**: tudo que há entre o nome do bucket e do objeto. Por exemplo, em `s3://my-bucket/my_folder1/another_folder1/my_file.txt`, o prefixo é `my_folder1/another_folder1/`.
+
+**Casos de uso**
+
+* Backup and storage;
+* Disaster Recovery;
+* Archive;
+* Hybrid Cloud Storage;
+* Application Hosting;
+* Media Hosting;
+* Data Lakes & Big Data Analytics;
+* Software Delivery;
+* Statis Website.
+
+**Regras para nomenclatura do Bucket**
+
+* Proibido usar uppercase e underscore;
+* 3-63 caracteres (sem acentos);
+* Não pode ser um ip;
+* Precisa começar com letra minúscula ou número;
+* Não pode começar com o prefixo `xn--`;
+* Não pode terminar com o sufixo `-s3alias`.
 
 [![Refs3](https://img.shields.io/badge/Referencia-s3-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingObjects.html)
 
@@ -54,18 +100,44 @@ O S3 pode ser usado para armazenar qualquer volume de dados estruturados, semi-e
 
 **S3 Standart**: Classe padrão. Se você não especificar a classe ao fazer upload de um objeto, o S3 assumirá a classe S3 Standart. Destinada para dados acessados com frequência. Você paga por GB armazenado e pelo n° de chamadas as APIs do S3 (PUT, GET, COPY, ...). Não há taxas de recuperação para S3-Standart;
 
+> **Use cases**: Big Data Analytics, Mobile & Gaming Applications, Distribuição de Conteúdo.
+
 **S3 Intelligent-Tiering**: Automação que movimenta os arquivos automaticamente para a classe mais apropriada. Você é cobrado pelo armazenamento, chamadas à API e pela quantidade de objetos monitorados pelo Inteligent-Tiering. Ideal quando o padrão de acesso dos objetos é desconhecido ou variável. Não há taxas de recuperação para S3 Intelligent-Tiering. Para acessar arquivos que o Intelligent-Tiering moveu para arquivamento, é preciso primeiro restaurá-los. Ao tentar acessar um objeto movido para uma classe de acesso infrequente, o Intelligent-Tiering o move primeiro para uma classe de acesso frequente para não serem cobradas taxas de recuperação.
 Se o tamanho de um objeto for menor que 128 KB, ele não será monitorado nem qualificado para o nivelamento automático. Objetos menores que isso são sempre armazenados no nível de acesso frequente;
 
+* Frequent Access Tier (automatico): default tier;
+* Infrequent Access Tier (automatico): objetos não acessos por 30 dias;
+* Archive Instant Access Tier (automatico): objetos não acessados por 90 dias;
+* Archive Access Tier (opcional): configurável de 90 a 700+ dias;
+* Deep Archive Access Tier (opcional): configurável de 180 a 700+ dias.
+
 **S3 Standart – IA**: Para dados duradouros e acessados com pouca frequência. A latência do primeiro bit é de milissegundos também, mas é cobrada uma taxa por recuperação. Se um objeto tiver menos de 128 KB e for armazenado nessa classe, ele será cobrado como um objeto de 128 KB. Além disso, o tempo mínimo cobrado pelo objeto é de 30 dias. Se ele ficar salvo por 1 dia e for deletado, você é cobrado por um armazenamento de 30 dias;
+
+> **Use Cases**: Disaster Recovery, Backups.
 
 **S3 One Zone – IA**: Para dados duradouros e acessados com pouca frequência que podem ser gerados novamente ou que não são críticos e que não precisam de alta resiliência e disponibilidade. Ao contrário das outras classes que utilizam um modelo de replicação do dado em pelo menos 3 AZs, essa classe usa somente uma AZ;
 
-**S3 Glacier Instant Retrieval**: Para arquivar dados que raramente são acessados e exigem recuperação de milissegundos. A taxa de recuperação do dado é mais alta;
+> **Use Cases**: Backup Secundário ou dados que você pode recriar.
 
-**S3 Glacier Flexible Retrieval**: Possui um período mínimo de armazenamento de 90 dias e a latência do primeiro bit é de 1 a 5 minutos;
+**S3 Glacier Instant Retrieval**: Para arquivar dados que raramente são acessados e exigem recuperação de milissegundos. A taxa de recuperação do dado é mais alta. Duração mínima de storage de 90 dias;
 
-**S3 Glacier Deep Archive**: Classe mais barata, para dados raramente acessados. Os dados têm um período mínimo de duração de armazenamento de 180 dias e um tempo de recuperação padrão de 12 horas.
+**S3 Glacier Flexible Retrieval**: Possui um período mínimo de armazenamento de 90 dias e a latência do primeiro bit é de:
+
+* Expedited: 1 a 5 mintos;
+* Standar: 3 a 5 horas;
+* Bulk: 5 a 12 horas.
+
+**S3 Glacier Deep Archive**: Classe mais barata, para dados raramente acessados. Os dados têm um período mínimo de duração de armazenamento de 180 dias e um tempo de recuperação padrão de:
+
+* Standart: 12 horas;
+* Bulk: 48 horas.
+
+
+**Comparação das classes de armazenamento**:
+![](../imagens/s3-storage-class.png)
+
+**Movimentações possíveis entre classes de armazenamento**:
+![](../imagens/s3-storage-class-moving.png)
 
 [![Refs3](https://img.shields.io/badge/Referencia-storage_class-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html)
 
@@ -104,13 +176,22 @@ Você também pode exigir uma confirmação com MFA para executar a deleção ou
 
 ### 3.3. Replicação
 
-É possível configurar o bucket para fazer replicação de dados em um outro bucket, de modo que ao inserir objetos no bucket source, o dado é automaticamente replicado no bucket target.
+É possível configurar o bucket para fazer replicação de dados assíncrona em um outro bucket, de modo que ao inserir objetos no bucket source, o dado é automaticamente replicado no bucket target.
+
+É necessário que haja permissão de leitura (IAM ou Bucket Policy) no bucket de origem e permissão de escrita no bucket target.
 
 > **Note**
 > - Os buckets podem estar em Regions diferentes.
 
+* CRR: Cross-Region Replication;
+* SRR: Same-Region Replication.
+
 > **Warning**
-> - Você consegue habilitar a replicação em um bucket existente, porém, os dados inseridos antes da habilitação da replicação não são copiados para o bucket replicado.
+> - Você consegue habilitar a replicação em um bucket existente, porém, os dados inseridos antes da habilitação da replicação não são copiados para o bucket replicado. Se quiser que os dados existentes antes da habilitação da replicação sejam replicados, é preciso usar **S3 Batch Replication** (que também pode ser usado caso alguma replicação de objeto falhe).
+
+Adicionalmente, é possível replicar **delete markers** do bucket source para o target, pois por default, deleções de um version ID não são replicados para evitar deleções maliciosas.
+
+Não existe "chaining replication". Se o Bucket A replica para o Bucket B, e o Bucket B para o C, então o Bucket A **não replica automaticamente** para o bucket C.
 
 [![Refs3](https://img.shields.io/badge/Referencia-replication-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html)
 
@@ -301,6 +382,40 @@ Com o IAM, é possível gerenciar, de maneira centralizada, permissões que cont
 
 ### 4.3. Bucket Policy
 
+Políticas baseadas em recurso em JSON.
+
+* Resources: buckets e objetos;
+* Effect: Allow/ Deny
+* Actions: Conjunto de APIs para habilitar ou negar;
+* Principal: conta AWS ou usuário para aplicar a policy.
+
+Bucket Policy é usada para:
+
+* Habilitar acesso público ao bucket;
+* Forçar objetos a serem criptografados no upload;
+* Dar acesso a outra conta ao bucket (cross account).
+
+Exemplo de bucket policy:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PublicRead",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::examplebucket/*"
+            ]
+        }
+    ]
+}
+```
+
 
 ### 4.4. Endpoints
 
@@ -312,6 +427,77 @@ Com o IAM, é possível gerenciar, de maneira centralizada, permissões que cont
 
 
 ### 4.7. IAM Access Analyzer para S3
+
+### 4.8. Criptografia
+
+É possível criptografar os objetos no S3 usando 4 métodos:
+
+* **Server-Side Encryption (SSE) with Amazon S3-Managed Keys (SSE-S3)**: habilitado por default;
+* **SSE with KMS keys stored in AWS KMS (SSE-KMS)**: o KMS gerencia a chave de criptografia;
+* **SSE with Customer-PRovided Keys (SSE-C)**: quando o cliente gerencia sua própria chave de criptografia;
+* **Client-Side Encryption**. 
+
+**SSE-S3**:
+
+Criptografia usando chaves gerenciadas pela AWS. O objeto é criptografado no lado do servidor usando criptografia do tipo `AES-256`.
+
+O header das requisições nesse caso precisam conter `"x-amz-server-side-encryption": "AES256"`.
+
+Habilitado por default em novos buckets e novos objetos.
+
+![](../imagens/s3-cript-sse-s3.png)
+
+**SSE-KMS**:
+
+Criptografia usando chaves gerencias pelo KMS.
+
+Vantagens: controle do usuário + auditoria do uso da chave usando CloudTrail.
+
+Limitações: se você usar SSE-KMS, será impactado pelos limites do KMS. Quando ocorrer upload no S3, será chamada a API `GenerateDataKey` do KMS e quando ocorrer download será chamada a API `Decrypt`. Essas chamadas de API estarão sujeitas a cota de requisições por segundo do KMS (5.500, 10.000, 30.000 req/s, dependendo da região).
+
+> **Obs**.: é possível solicitar aumento de cotas usando o Service Quotas Console.
+
+Objeto criptografado do lado do servidor e o header da requisição deve conter `x-amz-server-side-encryption": "aws:kms"`.
+
+![](../imagens/s3-cript-sse-kms.png)
+
+**SSE-C**:
+
+Criptografia usando chave gerenciada pelo cliente fora da AWS.
+O S3 não armazena a chave de criptografia que você fornece.
+
+É obrigatório o uso de HTTPS.
+
+A encryption key deve ser fornecida no header HTTP para cada requisição.
+
+![](../imagens/s3-cript-sse-c.png)
+
+**Client-Side Encryption**:
+
+Usa libraries como `Amazon S3 Client-Side Encryption Library` e o dado deve ser criptografado antes de ser enviado ao S3.
+
+O cliente também precisa descriptografar o dado por si mesmo ao fazer download.
+
+O cliente gerencia as chaves e todo o ciclo de criptografia.
+
+![](../imagens/s3-cript-client.png)
+
+**Criptografia em trânsito (SSL/TLS)**
+
+Criptografia de dados em trânsito é chamada de SSL/TLS,
+
+Amazon S3 expõe 2 endpoints:
+
+* HTTP Endpoint: não criptografado;
+* HTTPS Endpoint: Criptografado.
+
+É possível forçar criptografia em trânsito nas requisições:
+
+![](../imagens/s3-ssl.png)
+
+Também é possível configurar Bucket Policy para permitir `PUT` apenas de objetos criptografados.
+
+![](../imagens/s3-cript-force.png)
 
 ---
 
@@ -504,9 +690,9 @@ Faça o mesmo para o arquivo `error.html`, e em casos de erro a requisição ser
 
 ### 5.7. Multpart Upload
 
-Permite que vocÊ faça upload de um único objeto como um conjunto de partes. Cada parte é uma parte contínua de dados do objeto e o upload dessas partes pode ser feito de forma independente e em qualquer ordem. Se a transmissão de umas das partes falhas, vocÊ pode retransmitir essa parte sem afetar as outras. Depois que todas as partes do objeto forem carregadas, o S3 montará essas partes e criará o objeto.
+Permite que você faça upload de um único objeto como um conjunto de partes. Cada parte é uma parte contínua de dados do objeto e o upload dessas partes pode ser feito de forma independente e em qualquer ordem. Se a transmissão de umas das partes falhas, vocÊ pode retransmitir essa parte sem afetar as outras. Depois que todas as partes do objeto forem carregadas, o S3 montará essas partes e criará o objeto.
 
-Esse tipo de upload é recomendado quando você precisa fazer upload de objetos maiores que 100 MB.
+Esse tipo de upload é recomendado quando você precisa fazer upload de objetos maiores que 100 MB (e extremamente recomendado para objetos maiores que 5 GB).
 
 Benefícios do Multipart Upload:
 
@@ -539,6 +725,107 @@ Um navegador normalmente impediria que o JavaScript fizesses essas solicitaçõe
 Você possui um website estático no S3 e precisa acessar dados de outro domínio, como outro site em um outro bucket S3.
 
 [![Refs3](https://img.shields.io/badge/Referencia-CORS-0A66C2?style=for-the-badge&logo=&logoColor=white)](https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/cors.html)
+
+### 5.9. Amazon S3 Analytics
+
+Te ajuda a decidir quanto mover um objeto para a classe de armazenamento apropriada.
+
+Faz recomendações para classes Standart e Standart IA (não faz para One-Zone IA ou Glacier).
+
+O report é atualizado diariamente e leva de 24 a 48h para começar a ver a analise de dados.
+
+![](../imagens/s3-analytics.png)
+
+### 5.10. Notificação de eventos
+
+É possível disparar eventos com base em ações que ocorrem no S3:
+
+* S3:ObjectCreated;
+* S3:ObjectRemoved;
+* S3:ObjectRestored;
+* S3:Replication.
+
+Geralmente, o S3 entrega eventos em alguns segundos, mas pode levar até alguns minutos.
+
+**Ferramentas que consomem os eventos do S3**:
+![](../imagens/s3-event.png)
+
+* Para SNS: configurar a SNS Resource Policy para que os eventos do S3 disparem tópicos do SNS;
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": {
+        "Effect": "Allow",
+        "Action": "SNS:Publish",
+        "Principal": {
+            "Service": "s3.amazonaws.com"
+        },
+        "Resource": "arn:aws:sns-us-east-1:123456789012:MyTopic",
+        "Condition":{
+            "ArnLike":{
+                "aws:SourceArn": "arn:aws:s3:::MyBucket"
+            }
+        }
+    }
+}
+```
+
+* Para SQS: configurar a SQS Resource Policy para que o queue recebe eventos do S3;
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": {
+        "Effect": "Allow",
+        "Action": "SQS:SendMessage",
+        "Principal": {
+            "Service": "s3.amazonaws.com"
+        },
+        "Resource": "arn:aws:sqs-us-east-1:123456789012:MyQueue",
+        "Condition":{
+            "ArnLike":{
+                "aws:SourceArn": "arn:aws:s3:::MyBucket"
+            }
+        }
+    }
+}
+```
+
+* Para lambda: configurar a Lambda Resource Policy para consumir os eventos do S3 no Lambda.
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": {
+        "Effect": "Allow",
+        "Action": "lambda:InvokeFunction",
+        "Principal": {
+            "Service": "s3.amazonaws.com"
+        },
+        "Resource": "arn:aws:lambda-us-east-1:123456789012:function:MyFunction",
+        "Condition":{
+            "ArnLike":{
+                "aws:SourceArn": "arn:aws:s3:::MyBucket"
+            }
+        }
+    }
+}
+```
+
+Também é possível consumir os eventos do S3 no Amazon Event Bridge.
+
+![](../imagens/s3-event-eventbridge.png)
+
+* Advanced Filtering: opções com JSON rules (metadata, object size, name...);
+* Multiple Destinations: ex. Step Functions, Kinesis Streams;
+* EventBridge Capabilities: Archive, Replay Events.
+
+### 5.11. S3 Byte-Range Fetches
+
+Paraleliza GETs ao requisitar um range específico de bytes do objeto. Dá uma boa resiliência em caso de falhas e pode ser usado para aumentar a velocidade de download de um objeto ou para recuperar apenas um pedaço do objeto de interesse.
+
+![](../imagens/s3-byterange.png)
 
 ---
 
