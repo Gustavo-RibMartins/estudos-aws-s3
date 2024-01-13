@@ -10,6 +10,8 @@ Casos de estudo:
 
 [caso-02](../caso-02/): criação de um bucket que atende as seguintes condições de segurança:
 
+![](https://img.shields.io/badge/-Em_Construção-darkred?style=for-the-badge&logo=&logoColor=white)
+
 * Aceita apenas upload de objetos criptografados pelo KMS;
 * Aceita apenas requisições HTTPS (não aceita HTTP);
 * Permite apenas `PUT` de objetos feitos pelo usuário `DevSecOps`;
