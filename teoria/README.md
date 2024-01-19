@@ -15,7 +15,7 @@
     - [4.1. Bloqueio de acesso público](#41-bloqueio-de-acesso-público)
     - [4.2. IAM](#42-iam) <<< doing
     - [4.3. Bucket Policy](#43-bucket-policy)
-    - [4.4. Endpoints](#44-endpoints) <<< to do
+    - [4.4. Endpoints/ Access Points](#44-endpoints-access-points)
     - [4.5. ACLs](#45-acls) <<< to do
     - [4.6. Propriedade de objeto do S3](#46-propriedade-de-objeto-do-s3) <<< to do
     - [4.7. IAM access analyzer para S3](#47-iam-access-analyzer-para-s3) <<< to do
@@ -31,6 +31,7 @@
     - [5.9. Amazon S3 Analytics](#59-amazon-s3-analytics)
     - [5.10. Event Notification](#510-notificação-de-eventos)
     - [5.11. S3 Byte-Range Fetches](#511-s3-byte-range-fetches)
+    - [5.12. S3 Object Lambda](#512-s3-object-lambda) <<< to do
 - [6. Modelo de consistência de dados](#6-modelo-de-consistência-de-dados)
 
 ---
@@ -417,8 +418,22 @@ Exemplo de bucket policy:
 ```
 
 
-### 4.4. Endpoints
+### 4.4. Endpoints/ Access Points
 
+Simplificam a gestão de segurança para Buckets S3 removendo a complexidade de ter uma única bucket policy gigantesca.
+
+![](../imagens/s3-access-points.png)
+
+Cada ponto de acesso tem:
+
+* Seu próprio DNS (Internet Origin ou VPC Origin);
+* Uma Access Point Policy (similar a bucket policy) gerenciando a segurança em escala.
+
+Podemos definir o access point para ser acessível apenas de dentro de uma VPC.
+Devemos criar um VPC Endpoint para acessar o Access Point (Gateway ou Interface Endpoint).
+O VPC Endpoint Policy precisa habilitar acesso ao Bucket Target e ao Access Point.
+
+![](../imagens/s3-access-points-2.png)
 
 ### 4.5. ACLs
 
@@ -826,6 +841,8 @@ Também é possível consumir os eventos do S3 no Amazon Event Bridge.
 Paraleliza GETs ao requisitar um range específico de bytes do objeto. Dá uma boa resiliência em caso de falhas e pode ser usado para aumentar a velocidade de download de um objeto ou para recuperar apenas um pedaço do objeto de interesse.
 
 ![](../imagens/s3-byterange.png)
+
+### 5.12. S3 Object Lambda
 
 ---
 
